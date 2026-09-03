@@ -504,7 +504,7 @@ class zwavejs extends eqLogic {
 		if (($mode == 'local') and (! empty(system::ps('server/bin/www.js'))))
 			return true;
 		if (($mode == 'remote') and (config::byKey('remoteDeamonStatus', __CLASS__,'') == "running"))
-			return true;
+			return self::getDeamon()->isRunning();
 		return false;
 	}
 
@@ -522,7 +522,17 @@ class zwavejs extends eqLogic {
 		   log::add(__CLASS__, 'debug', '[' . __FUNCTION__ . '] settings MQTT: ' . json_encode($mqttSettings));
 		   $mqttd = self::getDeamon();
 		   $mqttd->start ($mqttSettings);
-		   sleep(3);
+		   /* Le demon ecrit son fichier PID peu apres son lancement. Un
+		    * delai fixe reste perdant sur une machine chargee : on attend
+		    * qu'il apparaisse, et on repart des qu'il est la. Sans cela
+		    * deamon_start() echoue alors que le demon demarre bien, laisse
+		    * remoteDeamonStatus a 'stopped', et le watchdog du core lance
+		    * une deuxieme instance qui ne peut plus prendre le socket. */
+		   $i = 0;
+		   while (($i < 15) && (! $mqttd->isRunning())) {
+			sleep(1);
+			$i++;
+		   }
 		   if (! ($mqttd->isRunning()))
 			throw new Exception('Démon MQTT non démarré ou mauvais paramétrage, vérifier les logs');
 		   $mqttd->send ('addTopic',$mqttSettings['prefix']);
@@ -585,7 +595,11 @@ class zwavejs extends eqLogic {
 		$mqttSettings = config::byKey('mqtt', __CLASS__,array());
 		$mqttd = self::getDeamon();
 		if ($mqttd->isRunning()) {
-			$mqttd->send ('removeTopic',$mqttSettings['prefix']);
+			try {
+				$mqttd->send ('removeTopic',$mqttSettings['prefix']);
+			} catch (Throwable $e) {
+				log::add(__CLASS__, 'warning', __('Impossible de retirer le topic MQTT : ', __FILE__) . $e->getMessage());
+			}
 			$mqttd->stop();
 		}
 		if ($zwSettings['mode'] == 'local') {
