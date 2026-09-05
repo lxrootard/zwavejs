@@ -11,6 +11,7 @@ sftp-config.json
 Thumbs.db
 *.php~
 *.lock
+package-lock.json
 docs/_site/
 docs/Gemfile.lock
 docs/.sass-cache/

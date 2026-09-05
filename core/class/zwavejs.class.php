@@ -504,7 +504,7 @@ class zwavejs extends eqLogic {
 		if (($mode == 'local') and (! empty(system::ps('server/bin/www.js'))))
 			return true;
 		if (($mode == 'remote') and (config::byKey('remoteDeamonStatus', __CLASS__,'') == "running"))
-			return true;
+			return self::getDeamon()->isRunning();
 		return false;
 	}
 
@@ -522,7 +522,11 @@ class zwavejs extends eqLogic {
 		   log::add(__CLASS__, 'debug', '[' . __FUNCTION__ . '] settings MQTT: ' . json_encode($mqttSettings));
 		   $mqttd = self::getDeamon();
 		   $mqttd->start ($mqttSettings);
-		   sleep(3);
+		   $i = 0;
+		   while (($i < 10) && (! $mqttd->isRunning())) {
+			sleep(1);
+			$i++;
+		   }
 		   if (! ($mqttd->isRunning()))
 			throw new Exception('Démon MQTT non démarré ou mauvais paramétrage, vérifier les logs');
 		   $mqttd->send ('addTopic',$mqttSettings['prefix']);
@@ -585,8 +589,12 @@ class zwavejs extends eqLogic {
 		$mqttSettings = config::byKey('mqtt', __CLASS__,array());
 		$mqttd = self::getDeamon();
 		if ($mqttd->isRunning()) {
-			$mqttd->send ('removeTopic',$mqttSettings['prefix']);
-			$mqttd->stop();
+			try {
+				$mqttd->send ('removeTopic',$mqttSettings['prefix']);
+				$mqttd->stop();
+			} catch(Exception $e) {
+				self::send_alert ($e->getmessage());
+			}
 		}
 		if ($zwSettings['mode'] == 'local') {
 			$find = 'server/bin/www.js';
@@ -853,6 +861,7 @@ class zwavejs extends eqLogic {
 										}
 									}
 								} catch (Exception $e) {
+									self::send_alert ($e->getMessage());
 								}
 							}
 							self::addFileEvent('getNodeInfo' . $node['id'], $node);
@@ -1200,6 +1209,7 @@ class zwavejs extends eqLogic {
 				$name = $eqLogic->getName();
 				$eqLogic->setNameLocation($name, $location);
 			} catch (Exception $e) {
+				self::send_alert ($e->getMessage());
 			}
 		}
 	}

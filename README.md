@@ -153,6 +153,8 @@ Vérifiez la communication en cliquant sur le bouton `Tester`
 * Si ca ne suffit pas comparez les 2 fichiers de configuration `zwavejs/data/store/settings.json` et `/root/store/zwavejs/config.json`
 
 ## Changelog
+* v3.5 [lxrootard](https://github.com/lxrootard)
+<br> - merge ripleyXLR8:fix/remote-daemon-robustness + corrections diverses
 * v3.4 [lxrootard](https://github.com/lxrootard)
 <br> - update upstream: custom pictures + config files
 * v3.3 [lxrootard](https://github.com/lxrootard)
