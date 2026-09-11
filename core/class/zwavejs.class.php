@@ -753,6 +753,9 @@ class zwavejs extends eqLogic {
 					event::add('zwavejs::version_updated', array());
 				}
 			} else if ($key == 'getNodes') {
+				$value['result'] = array_filter($value['result'], function ($node) {
+					return $node['id'] != 255;
+				});
 				if ($value['origin']['type'] == 'sync') {
 					self::syncNodes($value['result']);
 				} else if ($value['origin']['type'] == 'stats') {
@@ -1633,12 +1636,10 @@ class zwavejs extends eqLogic {
 				$healthPage .= '<tr><td><span class="label label-primary">' . $values['id'] . '</span></td>';
 				$eqLogic = self::byLogicalId($values['id'], __CLASS__);
 				$productDetails = '<sup><i class="fas fa-question-circle tooltips" title="' . $values['manufacturer'] . ' ' . $values['productDescription'] . ' Firmware : ' . $values['firmwareVersion'] . '"></i><sup>';
+
 				if (is_object($eqLogic)) {
-					$image = 'plugins/zwavejs/core/config/devices/' . $eqLogic->getImgFilePath();
-					if (!is_file(dirname(__FILE__) . '/../config/devices/' . $eqLogic->getImgFilePath())) {
-						$image = 'plugins/zwavejs/plugin_info/zwavejs_icon.png';
-					}
-					$healthPage .= '<td><img src="' . $image . '" height="40"/> <a href="index.php?v=d&p=zwavejs&m=zwavejs&id=' . $eqLogic->getId() . '">' . $eqLogic->getHumanName(true) .  '</a>' . ' ' . $productDetails . '</td>';
+					$healthPage .= '<td><img src="' . $eqLogic->getImage() . '" height="40"/> <a href="index.php?v=d&p=zwavejs&m=zwavejs&id=' 
+					. $eqLogic->getId() . '">' . $eqLogic->getHumanName(true) .  '</a>' . ' ' . $productDetails . '</td>';
 				} else {
 					$healthPage .= '<td><img src="plugins/zwavejs/plugin_info/zwavejs_icon.png" height="40"/> ' . $values['productLabel'] . ' - ' . $values['productDescription'] . ' ' . $productDetails . '</td>';
 				}
@@ -2588,7 +2589,7 @@ class zwavejsCmd extends cmd {
 			$eqLogic->setNodeValue($fullPath, $value);
 			return;
 		}
-		if (substr($value, 0, 3) == 'set') {
+		if (is_string($value) && substr($value, 0, 3) == 'set') {
 			$fullPath = $node . '-' . $cc . '-' . $endpoint . '-' . $property;
 			$val = explode('-', $value, 2)[1];
 			$eqLogic->setNodeValue($fullPath, $val);

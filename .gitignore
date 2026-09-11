@@ -10,7 +10,6 @@ sftp-config.json
 .DS_Store
 Thumbs.db
 *.php~
-*.lock
 package-lock.json
 docs/_site/
 docs/Gemfile.lock
