@@ -753,9 +753,11 @@ class zwavejs extends eqLogic {
 					event::add('zwavejs::version_updated', array());
 				}
 			} else if ($key == 'getNodes') {
-				$value['result'] = array_filter($value['result'], function ($node) {
-					return $node['id'] != 255;
-				});
+				if (isset($value['result']) && is_array($value['result'])) {
+					$value['result'] = array_filter($value['result'], function ($node) {
+						return $node['id'] != 255;
+					});
+				}
 				if ($value['origin']['type'] == 'sync') {
 					self::syncNodes($value['result']);
 				} else if ($value['origin']['type'] == 'stats') {
