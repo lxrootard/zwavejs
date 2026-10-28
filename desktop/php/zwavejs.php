@@ -23,7 +23,9 @@ $plugin = plugin::byId('zwavejs');
 sendVarToJS('eqType', $plugin->getId());
 $eqLogics = eqLogic::byType($plugin->getId());
 $controllerStatus = config::byKey('controllerStatus', 'zwavejs', 'none');
-$mode = config::byKey('zwavejs_mode',  'zwavejs', '');
+
+$zwSettings = config::byKey('zwavejs', 'zwavejs', array());
+$mode = $zwSettings['mode'];
 $driverStatus = config::byKey('driverStatus', 'zwavejs', 0);
 
 if (!zwavejs::isRunning()) {

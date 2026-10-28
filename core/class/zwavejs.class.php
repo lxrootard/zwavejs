@@ -26,6 +26,7 @@ use jeedomtools\MQTTClient as zw_MQTTClient;
 class zwavejs extends eqLogic {
 
 	private static $_deamon;
+	public static $_encryptConfigKey = array('mqtt'); 
 
 	public static function getDeamon() {
 	   if (is_null(self::$_deamon)) {
@@ -328,7 +329,8 @@ class zwavejs extends eqLogic {
 		$mqttSettings = config::byKey('mqtt', __CLASS__,array());
 
 		log::add(__CLASS__, 'debug', '[' . __FUNCTION__ . '] ' . __('Configuration ZWaveJS: ', __FILE__) . json_encode($zwSettings));
-		log::add(__CLASS__, 'debug', '[' . __FUNCTION__ . '] ' . __('Configuration MQTT: ', __FILE__) . json_encode($mqttSettings));
+		log::add(__CLASS__, 'debug', '[' . __FUNCTION__ . '] ' . __('Configuration MQTT: ', __FILE__) .
+			str_replace($mqttSettings['passwd'], '***', json_encode($mqttSettings)));
 
 		$settings['mqtt']['name'] = $mqttSettings['gateway'];
 		$settings['mqtt']['host'] = $mqttSettings['host'];
@@ -519,7 +521,9 @@ class zwavejs extends eqLogic {
 		   $mqttSettings = config::byKey('mqtt', __CLASS__);
 		   $mqttSettings['cbclass'] = 'jeeZwave';
 		   config::save('mqtt', json_encode($mqttSettings), __CLASS__);
-		   log::add(__CLASS__, 'debug', '[' . __FUNCTION__ . '] settings MQTT: ' . json_encode($mqttSettings));
+		   log::add(__CLASS__, 'debug', '[' . __FUNCTION__ . '] settings MQTT: ' .
+			str_replace($mqttSettings['passwd'], '***', json_encode($mqttSettings)));
+
 		   $mqttd = self::getDeamon();
 		   $mqttd->start ($mqttSettings);
 		   $i = 0;

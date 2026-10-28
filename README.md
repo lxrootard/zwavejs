@@ -153,6 +153,8 @@ Vérifiez la communication en cliquant sur le bouton `Tester`
 * Si ca ne suffit pas comparez les 2 fichiers de configuration `zwavejs/data/store/settings.json` et `/root/store/zwavejs/config.json`
 
 ## Changelog
+* v3.8 [lxrootard](https://github.com/lxrootard)
+<br> security fix: encrypted MQTT password, anonymized logs
 * v3.7 [lxrootard](https://github.com/lxrootard)
 <br> fix TypeError: array_filter() error
 * v3.6 [lxrootard](https://github.com/lxrootard)
